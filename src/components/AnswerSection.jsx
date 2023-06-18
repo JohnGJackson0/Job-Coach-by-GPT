@@ -1,38 +1,42 @@
-import React from 'react'
+import React, { useState } from "react";
+import { promptGPT } from "../util";
+import { createCuratedResumePrompt } from "../Prompt";
+import { PromptDisplayer } from "./PromptDisplayer";
 
 const AnswerSection = ({ storedValues }) => {
-    const copyText = (text) => {
-        navigator.clipboard.writeText(text);
-    };
+  const [curatedResume, setCuratedResume] = useState(false);
 
-    return (
-        <>
-            <hr className="hr-line" />
-            {/* <div className="answer-section">
-						<p className="question">{question}</p>
-						<p className="answer">{answer}</p>
-						<div className="copy-icon">
-							<i className="fa-solid fa-copy"></i>
-						</div>
-					</div> */}
-            <div className="answer-container">
-                {storedValues.map((value, index) => {
-                    return (
-                        <div className="answer-section" key={index}>
-                            <p className="question">{value.question}</p>
-                            <p className="answer">{value.answer}</p>
-                            <div
-                                className="copy-icon"
-                                onClick={() => copyText(value.answer)}
-                            >
-                                <i className="fa-solid fa-copy"></i>
-                            </div>
-                        </div>
-                    );
-                })}
+  const copyText = (text) => {
+    navigator.clipboard.writeText(text);
+  };
+
+  const handleClick = async (keywords) => {
+    setCuratedResume(await promptGPT(createCuratedResumePrompt(keywords)));
+  };
+
+  return (
+    <>
+      <hr className="hr-line" />
+      <div className="answer-container">
+        {storedValues.map((value, index) => {
+          return (
+            <div className="answer-section" key={index}>
+              <p>Keywords:</p>
+              <p className="answer">{value.answer}</p>
+              <div className="copy-icon" onClick={() => copyText(value.answer)}>
+                <button onClick={() => handleClick(value.answer)}>
+                  Create Curated Resume
+                </button>
+              </div>
+              {curatedResume !== false && (
+                <PromptDisplayer>{curatedResume}</PromptDisplayer>
+              )}
             </div>
-        </>
-    )
-}
+          );
+        })}
+      </div>
+    </>
+  );
+};
 
-export default AnswerSection
+export default AnswerSection;
